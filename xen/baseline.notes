@@ -1,0 +1,62 @@
+The script is compiled with the following:
+
+pp baseline.pl -o baseline -M Xen::API -M URI -M HTTP::Config -M RPC::XML::Client -M IO::Prompt -M Number::Format -M Time::HiRes -M Term::ProgressBar -M arybase -l /lib/libexpat.so.0
+
+The development environment is a XenServer 6.5 running on a VirtualBox image
+
+The yum installations - tons of things were missing or broken due to the way Xen has its packages setup:
+
+  groupinstall 'Development Tools'
+  groupinstall 'Development Tools' --skip-broken
+  groupinstall 'Development Tools' -x elfutils-libelf -x systemtap-runtime
+  install elfutils-libelf-devel.x86_64
+  install elfutils-libelf.i386
+  install elfutils-libelf.i386 elfutils-libelf.x86_64 elfutils-libelf-devel.i386 elfutils-libelf-devel.x86_64 elfutils-libelf-devel-static.i386 elfutils-libelf-devel-static.x86_64
+  install epel-release
+  install expat.i386 expat.x86_64 expat-devel.i386 expat-devel.x86_64 expat21.i386 expat21.x86_64 expat21-devel.i386 expat21-devel.x86_64
+  install libxml2.i386 libxml2.x86_64 libxml2-devel.i386 libxml2-devel.x86_64 libxslt.i386 libxslt.x86_64 libxslt-devel.i386 libxslt-devel.x86_64 perl-XML-LibXML.x86_64 perl-XML-LibXML-Common.x86_64 perl-libxml-perl.noarch
+  install perlbrew
+  install perl-XML-SAX.noarch
+  install xml-commons.x86_64 perl-XML-SAX.noarch perl-XML-Simple.noarch perl-libxml-perl.noarch
+  install yum-utils
+
+The perl environment was built with perlbrew using 5.18.2 - this list include initial setup and post perlbrew installation:
+
+ cpan
+ cpan CPAN
+ cpan Bundle::CPAN
+ cpan Xen::API
+ cpan Moose
+ cpan Package::DeprecationManager
+ curl -L https://cpanmin.us | perl - App::cpanminus
+ curl -L https://cpanmin.us
+ curl --no-certificate -L https://cpanmin.us | perl - App::cpanminus
+ curl -L http://cpanmin.us | perl - App::cpanminus
+ cpanm Xen::API
+ cpanm RPC::XML
+ cpanm XML::LibXML::InputCallback
+ cpanm XML::LibXML::SAX
+ cpan XML::LibXML::SAX
+ cpanm RPC::XML
+ cpanm Xen::API
+ cpan Number::Format
+ cpanm Xen::API
+ cpanm Xen::API --force
+ cpanm pp
+ perlbrew
+ perlbrew install 5.18.2
+ perlbrew init
+ perlbrew install 5.18.2
+ perlbrew switch perl-5.18.2
+ perlbrew
+ perlbrew switch 5.18.2
+ curl -L https://cpanmin.us | perl - App::cpanminus
+ curl -L http://cpanmin.us | perl - App::cpanminus
+ which cpanm
+ cpanm Xen::API
+ cpanm RPC::XML
+ cpanm Xen::API
+ cpanm pp
+ cpanm Term::ProgressBar
+
+Likely you'll need to mix and match the cpan installations with yum to get the depencies worked out - I built this by hand and saved the image.
