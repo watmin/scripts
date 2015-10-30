@@ -56,7 +56,7 @@ for my $key (sort keys %sql1_tables) {
             print "[*] Here is the raw diff:\n\n";
             print "--- $sql1\n";
             print "+++ $sql2\n";
-            system( "bash", "-c", "diff -bur <(echo '$sql1_tables{$key}') <(echo '$sql2_tables{$key}') | tail -n +3" );
+            system( "bash", "-c", "diff -bur <(echo '$sql1_tables{$key}') <(echo '$sql2_tables{$key}')|tail -n +3" );
             print '#' x 80, "\n\n";
         }
     }
