@@ -42,7 +42,7 @@ my %sql2_tables = get_tables($sql2);
 for my $key (sort keys %sql1_tables) {
     if ( exists $sql2_tables{$key} ) {
         if ( $sql1_tables{$key} ne $sql2_tables{$key} ) {
-            print "The table '$key' doesn't match\n\n";
+            print "[?] The table '$key' doesn't match\n\n";
 
             my ( $s1_c, $s1_p, $s1_u, $s1_k, $s1_e ) = table_hashes( $sql1_tables{$key} );
             my ( $s2_c, $s2_p, $s2_u, $s2_k, $s2_e ) = table_hashes( $sql2_tables{$key} );
@@ -53,7 +53,7 @@ for my $key (sort keys %sql1_tables) {
             print_diffs( $s1_k, $s2_k, 'key' );
             print_diffs( $s1_e, $s2_e, 'engine' );
 
-            print "Here is the raw diff:\n\n";
+            print "[*] Here is the raw diff:\n\n";
             print "--- $sql1\n";
             print "+++ $sql2\n";
             system( "bash", "-c", "diff -bur <(echo '$sql1_tables{$key}') <(echo '$sql2_tables{$key}') | tail -n +3" );
@@ -61,7 +61,7 @@ for my $key (sort keys %sql1_tables) {
         }
     }
     else {
-        print "The table '$key' doesn't exist\n\n";
+        print "[!] The table '$key' doesn't exist\n\n";
         print '#' x 80, "\n\n";
     }
 }
@@ -158,21 +158,21 @@ sub print_diffs {
     my $diff;
     for my $key (sort keys %{$hash1}) {
         if ( ! exists $hash2->{$key} ) {
-            print "The $type '$key' does not exist.\n\n";
+            print "[!] The $type '$key' does not exist.\n\n";
         }
         else {
             if ( $hash1->{$key} ne $hash2->{$key} ) {
                 $diff++;
                 if ( $diff == 1 ) {
-                    print "Here are the $type differences:\n\n";
+                    print "[#] Here are the $type differences:\n\n";
                 }   
                 print "The $type '$key' differs:\n";
                 printf "%-${len}s: %s\n", $sql1, $hash1->{$key};
                 printf "%-${len}s: %s\n", $sql2, $hash2->{$key};
+                print "\n";
             }
         }
     }
-    $diff and print "\n";
 
     return;
 }
