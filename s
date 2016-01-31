@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 #: Author  : John Shields <jshields@alertlogic.com>
 #: Name    : s
-#: Version : 1.0.0
+#: Version : 1.0.1
 #: Path    : /usr/local/bin/s
 #: Params  : See --help
 #: Desc    : SSH wrapper with logging
-#: Date    : 2016-01-31 15:30 CST
+#: Date    : 2016-01-31 16:15 CST
 
 use strict;
 use warnings;
@@ -45,7 +45,6 @@ GetOptions(
 
 $args{'help'} and help();
 
-# Setup some globals
 my $rhost = shift;
 $rhost or die "Failed to provide hostname\n";
 
@@ -60,19 +59,16 @@ if ($rhost =~ /\.elb\./i) {
 }
 my $interpreter_heredoc = "__shields__$luser${\time}$$";
 
-# Let's do some stuff
 sanity_checks();
 
 my ( $ruser, $rport, $rkey, @ssh_opts ) = prep_ssh( $luser, $dport, \%args, \@cli_opts );
 
 my ( $master_log, $master_log_h, $audit_log, $audit_log_h ) = prep_logging( $luser, $rhost );
 
-# Log to master log with who is doing what
 write_log( $master_log_h, "%s, INFO, %s, %s, %s\n",
   $luser, File::Spec->rel2abs($0), join( ' ', @orig_argv ), $audit_log );
 close $master_log_h;
 
-# Non-interactive
 if ( !$args{'root'} and ( @ARGV or -p STDIN or $args{'file'} ) ) {
     my $input;
     $input = 'STDIN' if -p *STDIN;
@@ -89,12 +85,11 @@ if ( !$args{'root'} and ( @ARGV or -p STDIN or $args{'file'} ) ) {
         '-q',
     );
 
-    # Prime our SSH streams
     my ( $ssh_pid, $ssh_in, $ssh_out, $response );
     my $ssh_conn = join ' ', $ssh_bin, @ssh_opts, @pipe_opts, $rhost;
     print "SSH connection is '$ssh_conn'\n" if $args{'debug'};
     $ssh_pid = open3( $ssh_in, $ssh_out, '>&STDERR', $ssh_conn )
-      or die "Failed to '$ssh_bin': $!\n";
+      or die "Failed to open '$ssh_bin': $!\n";
 
     print $ssh_in $command;
     while ( $response = <$ssh_out> ) {
@@ -114,7 +109,7 @@ if ( !$args{'root'} and ( @ARGV or -p STDIN or $args{'file'} ) ) {
 
     exit $exit_code;
 }
-else { # Interactive
+else {
     close $audit_log_h; # /usr/bin/script is going to log for us
 
     my $ssh_conn = join ' ', $ssh_bin, @ssh_opts, '-tt', $rhost;
@@ -123,7 +118,7 @@ else { # Interactive
 
     my @script_opts = ( '-f', '-q', '-c' );
 
-    if ( $args{'root'} ) { # If we are trying to get root
+    if ( $args{'root'} ) {
         my $script_comm = join ' ', $script_bin, @script_opts, "$ssh_conn", $audit_log;
         print "script command is '$script_comm'\n" if $args{'debug'};
 
@@ -140,7 +135,7 @@ else { # Interactive
 
         get_root( $expect, \%args );
     }
-    else { # Drop into normal shell
+    else {
         my $script_comm = join ' ', $script_bin, @script_opts, "$ssh_conn", $audit_log;
         print "script command is '$script_comm'\n" if $args{'debug'};
         system($script_comm);
@@ -206,12 +201,12 @@ sub sanity_checks {
     $input_check ++ if @ARGV;
     $input_check ++ if -p STDIN;
     $input_check ++ if $args{'file'};
-    
+
     die "Too many inputs\n" if $input_check > 1;
-    
+
     # Check rhost for validness
     sanitize( qr/([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*/, $rhost );
-    
+
     if ( $args{'file'} ) {
         die "Command file not found\n" if !-f $args{'file'};
         die "Command file not readable\n" if !-r $args{'file'};
@@ -331,7 +326,6 @@ sub get_command {
         die "Failed to provide audit_log file handle\n";
     }
 
-    # Decide where our input is coming from
     open my $stdin, '<&', *STDIN;
 
     if ( $opts{'file'} ) {
@@ -346,38 +340,23 @@ sub get_command {
 
     my ( $line, @stdin_lines );
 
-    # Start heredoc
     if ( $opts{'interpreter'} ) {
-         my $start = "cat <<'$interpreter_heredoc' | $opts{'interpreter'}\n";
-
-         if ($audit_log_h) {
-             write_log( $audit_log_h, "[input] %s", $start );
-         }
-
-         push @stdin_lines, $start;
+        my $start = "cat <<'$interpreter_heredoc' | $opts{'interpreter'}\n";
+        $audit_log_h and write_log( $audit_log_h, "[input] %s", $start );
+        push @stdin_lines, $start;
     }
 
-    # Read in all 'STDIN'
     while ( $line = <$stdin> ) {
-        if ($audit_log_h) {
-            write_log( $audit_log_h, "[input] %s", $line );
-        }
-
+        $audit_log_h and write_log( $audit_log_h, "[input] %s", $line );
         push @stdin_lines, $line;
     }
 
-    # Finish heredec
     if ( $opts{'interpreter'} ) {
         my $end = "$interpreter_heredoc\n";
-        
-        if ($audit_log_h) {
-            write_log( $audit_log_h, "[input] %s", $end );
-        }
-
+        $audit_log_h and write_log( $audit_log_h, "[input] %s", $end );
         push @stdin_lines, $end;
     }
 
-    # Build our input string
     my $command= join '', @stdin_lines, "exit \$?\n"; # Have to force an exit
 
     return $command;
