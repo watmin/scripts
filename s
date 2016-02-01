@@ -53,7 +53,7 @@ my $script_bin = '/usr/bin/script';
 
 my $is_elb;
 my $dport = '22';
-if ($rhost =~ /\.elb\./i) {
+if ($rhost =~ /\.elb\./ix) {
     $dport = '2222';
     $is_elb = 1;
 }
