@@ -191,7 +191,7 @@ EOH
 sub sanitize {
     my ( $regex, $input ) = @_;
 
-    die "Invalid input:\n\n$input\n\n" if $input !~ /^$regex$/;
+    die "Invalid input:\n\n$input\n\n" if $input !~ /^$regex$/x;
 
     return $input;
 }
