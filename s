@@ -248,18 +248,18 @@ sub write_log {
 }
 
 sub prep_ssh {
-    my ( $luser, $dport, $opts_r, $cli_opts_r ) = @_;
+    my ( $local_user, $default_port, $opts_r, $cli_r ) = @_;
 
     my %opts = %{ $opts_r };
-    my @cli_opts = @{ $cli_opts_r };
+    my @cli = @{ $cli_r };
 
-    my $ruser = $opts{'user'} || $luser;
-    my $rport = $opts{'port'} || $dport;
-    my $rkey  = $opts{'key'};
+    my $user = $opts{'user'} || $local_user;
+    my $port = $opts{'port'} || $default_port;
+    my $key  = $opts{'key'};
 
     my @opts = (
-        '-o' => "User=$ruser",
-        '-o' => "Port=$rport",
+        '-o' => "User=$user",
+        '-o' => "Port=$port",
     );
 
     if ($is_elb) {
@@ -273,15 +273,15 @@ sub prep_ssh {
         push @opts, ( '-o' => 'ConnectTimeout=30' );
     }
 
-    if (@cli_opts) {
-        for my $opt (@cli_opts) {
-            push @opts, ( '-o' => sanitize( qr/[A-Z][a-zA-Z]+=[a-zA-Z0-9:\-]+/x, $opt ) );
+    if (@cli) {
+        for my $cli_opt (@cli) {
+            push @opts, ( '-o' => sanitize( qr/[A-Z][a-zA-Z]+=[a-zA-Z0-9:\-]+/x, $cli_opt ) );
         }
     }
 
-    if ($rkey) {
+    if ($key) {
         push @opts, (
-            '-o' => "IdentityFile=$rkey",
+            '-o' => "IdentityFile=$key",
             '-o' => 'IdentitiesOnly=yes',
             '-o' => 'GSSAPIAuthentication=no',
             '-o' => 'PasswordAuthentication=no',
@@ -293,7 +293,7 @@ sub prep_ssh {
         );
     }
 
-    return ( $ruser, $rport, $rkey, @opts );
+    return ( $user, $port, $key, @opts );
 }
 
 sub prep_logging {
