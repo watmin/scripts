@@ -205,7 +205,10 @@ sub sanity_checks {
     die "Too many inputs\n" if $input_check > 1;
 
     # Check rhost for validness
-    sanitize( qr/([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*/, $rhost );
+    my $host_check;
+    $host_check .= qr/([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])/;
+    $host_check .= qr/(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*/;
+    sanitize( $host_check, $rhost );
 
     if ( $args{'file'} ) {
         die "Command file not found\n" if !-f $args{'file'};
