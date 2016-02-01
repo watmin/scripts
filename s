@@ -206,8 +206,8 @@ sub sanity_checks {
 
     # Check rhost for validness
     my $host_check;
-    $host_check .= qr/([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])/;
-    $host_check .= qr/(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*/;
+    $host_check .= qr/([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])/x;
+    $host_check .= qr/(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*/x;
     sanitize( $host_check, $rhost );
 
     if ( $args{'file'} ) {
@@ -215,18 +215,18 @@ sub sanity_checks {
         die "Command file not readable\n" if !-r $args{'file'};
     }
     if ( $args{'user'} ) {
-        sanitize( qr/([a-z_][a-z0-9_]{0,30})/, $args{'user'} );
+        sanitize( qr/([a-z_][a-z0-9_]{0,30})/x, $args{'user'} );
     }
     if ( $args{'port'} ) {
-        sanitize( qr/\d+/, $args{'port'} );
+        sanitize( qr/\d+/x, $args{'port'} );
     }
     if ( $args{'key'} ) {
-        sanitize( qr#(/)?([^/\0]+(/)?)+#, $args{'key'} );
+        sanitize( qr#(/)?([^/\0]+(/)?)+#x, $args{'key'} );
         die "SSH key not found\n" if !-f $args{'key'};
         die "SSH key not readable\n" if !-r $args{'key'};
     }
     if ( $args{'interpreter'} ) {
-        sanitize( qr/sh|bash|perl|python/, $args{'interpreter'} );
+        sanitize( qr/sh|bash|perl|python/x, $args{'interpreter'} );
     }
 
     return;
@@ -267,7 +267,7 @@ sub prep_ssh {
     }
 
     if ( $opts{'timeout'} ) {
-        push @opts, ( '-o' => 'ConnectTimeout=' . sanitize( qr/\d+/, $opts{'timeout'} ) );
+        push @opts, ( '-o' => 'ConnectTimeout=' . sanitize( qr/\d+/x, $opts{'timeout'} ) );
     }
     else {
         push @opts, ( '-o' => 'ConnectTimeout=30' );
@@ -275,7 +275,7 @@ sub prep_ssh {
 
     if (@cli_opts) {
         for my $opt (@cli_opts) {
-            push @opts, ( '-o' => sanitize( qr/[A-Z][a-zA-Z]+=[a-zA-Z0-9:\-]+/, $opt ) );
+            push @opts, ( '-o' => sanitize( qr/[A-Z][a-zA-Z]+=[a-zA-Z0-9:\-]+/x, $opt ) );
         }
     }
 
