@@ -147,14 +147,14 @@ else {
 die "This shouldn't have happened.\n";
 
 sub help {
-    print <<EOH;
+    print <<'EOH';
 s -- SSH auditor/wrapper/tool/connector
 
 Usage: s [ options ] hostname [ commands to run ]
 
 s can be provided commands to be ran on the remote server using the following:
   - STDIN : Commands read from an incoming pipe
-  - \@ARGV : Commands supplied via additional arguments
+  - @ARGV : Commands supplied via additional arguments
   - File  : Commands supplied via an input file
   Note: You can only supply one input stream.
 
