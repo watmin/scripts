@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 #: Author  : John Shields <jshields@alertlogic.com>
 #: Name    : s
-#: Version : 1.0.1
+#: Version : 1.0.2
 #: Path    : /usr/local/bin/s
 #: Params  : See --help
 #: Desc    : SSH wrapper with logging
-#: Date    : 2016-01-31 16:15 CST
+#: Date    : 2016-01-31 22:30 CST
 
 use strict;
 use warnings;
