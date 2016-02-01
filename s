@@ -321,15 +321,15 @@ sub prep_logging {
 }
 
 sub get_command {
-    my ( $opts_r, $audit_log_h ) = @_;
+    my ( $opts_r, $log_h ) = @_;
 
     my %opts = %{ $opts_r };
 
-    if ( !$opts{'root'} and !$audit_log_h ) {
+    if ( !$opts{'root'} and !$log_h ) {
         die "Failed to provide audit_log file handle\n";
     }
 
-    open my $stdin, '<&', *STDIN;
+    open my $stdin, '<&', *STDIN or die "Failed to copy STDIN: $!\n";
 
     if ( $opts{'file'} ) {
         open $stdin, '<', $opts{'file'}
@@ -338,25 +338,25 @@ sub get_command {
 
     if (@ARGV) {
         my $comm_str = join ' ', @ARGV, "\n";
-        open $stdin, '<', \$comm_str;
+        open $stdin, '<', \$comm_str or die "Failed to create handle from scalar ref: $!\n";
     }
 
     my ( $line, @stdin_lines );
 
     if ( $opts{'interpreter'} ) {
         my $start = "cat <<'$interpreter_heredoc' | $opts{'interpreter'}\n";
-        $audit_log_h and write_log( $audit_log_h, "[input] %s", $start );
+        $log_h and write_log( $log_h, "[input] %s", $start );
         push @stdin_lines, $start;
     }
 
     while ( $line = <$stdin> ) {
-        $audit_log_h and write_log( $audit_log_h, "[input] %s", $line );
+        $log_h and write_log( $log_h, "[input] %s", $line );
         push @stdin_lines, $line;
     }
 
     if ( $opts{'interpreter'} ) {
         my $end = "$interpreter_heredoc\n";
-        $audit_log_h and write_log( $audit_log_h, "[input] %s", $end );
+        $log_h and write_log( $log_h, "[input] %s", $end );
         push @stdin_lines, $end;
     }
 
