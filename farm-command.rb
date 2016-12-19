@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #: Author  : John Shields <john@shields.wtf>
 #: Name    : farm-command.rb
-#: Version : 0.3.0
+#: Version : 0.3.1
 #: Date    : 2016-12-19
 #: Path    : /usr/local/sbin/farm-command
 #: Params  : -e 'commands;to;run' -t 'hosts,to,run,on'
@@ -51,8 +51,7 @@ if not $options[:targets]
     raise 'Failed to provide target hosts'
 end
 
-max_jobs = $options[:max] || 1
-$jobs = (1..max_jobs).to_a.map{|x| [x, {:pid => 0}]}.to_h
+$jobs = (1..($options[:max] || 1)).to_a.map{|x| [x, {:pid => 0}]}.to_h
 
 hosts = []
 if File.exists?($options[:targets])
@@ -140,7 +139,7 @@ while true
     end
 
     active = $jobs.select{|key, val| val[:pid] != 0}
-    if active.keys.size == max_jobs
+    if active.keys.size == $jobs.keys.size
         if $options[:debug]
             $stderr.puts('DEBUG all workers consumed, sleeping')
         end
@@ -162,7 +161,7 @@ while true
         next
     elsif hosts.size == 0 and $done == false
         next
-    elsif active.keys.size < max_jobs and
+    elsif active.keys.size < $jobs.keys.size and
       job = $jobs.select{|key, val| val[:pid] == 0}.keys.shift and
       host = hosts.shift
         if $options[:debug]
