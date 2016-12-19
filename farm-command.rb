@@ -101,7 +101,6 @@ end
 
 def ssh_command(host, command)
     ssh_opts = [
-        '-q',
         '-o ConnectTimeout=10',
         '-o StrictHostKeyChecking=no',
         '-o PasswordAuthentication=no',
@@ -136,7 +135,6 @@ while true
     begin
         while (pid = Process.waitpid(-1, Process::WNOHANG)) != nil
             reset_job(pid)
-            break
         end
     rescue Errno::ECHILD
     end
