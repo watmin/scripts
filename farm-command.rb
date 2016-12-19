@@ -143,7 +143,7 @@ while true
         next
     elsif active.keys.size == 0 and $done == true
         if $options[:debug]
-            $stderr.puts('DEBUG all jobs done and hosts done')
+            $stderr.puts('DEBUG all jobs done, pids reaped. Breaking out of main loop')
         end
 
         break
