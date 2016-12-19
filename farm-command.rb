@@ -1,4 +1,12 @@
 #!/usr/bin/env ruby
+#: Author  : John Shields <john@shields.wtf>
+#: Name    : farm-command.rb
+#: Version : 0.3.0
+#: Date    : 2016-12-19
+#: Path    : /usr/local/sbin/farm-command
+#: Params  : -e 'commands;to;run' -t 'hosts,to,run,on'
+#: Options : -h|--help, -m|--max <jobs>, -d|--debug
+#: Desc    : Runs supplied command on target hosts
 
 require 'pty'
 require 'json'
